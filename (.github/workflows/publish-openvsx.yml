@@ -1,0 +1,31 @@
+name: Publish to Open VSX
+
+on:
+  release:
+    types: [published] # Triggers automatically when a new release is published on GitHub
+  workflow_dispatch:   # Allows manual triggers from the GitHub Actions tab
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Extension
+        run: npm run vscode:prepublish
+
+      - name: Package & Publish to Open VSX
+        uses: HaaLeo/publish-vscode-extension@v1
+        with:
+          pat: ${{ secrets.OPEN_VSX_TOKEN }}
+          extensionFile: '*.vsix' # Packages and publishes the generated VSIX file
